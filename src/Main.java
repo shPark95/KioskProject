@@ -3,18 +3,15 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Main {
-    public static List<MenuItem> menuItems = new ArrayList<>();
-
     public static void main(String[] args) {
-        initializeItems();
+        List<MenuItem> menuItems = new ArrayList<>();
+        initializeItems(menuItems);
 
-        Scanner sc = new Scanner(System.in);
-        do {
-            showHambergMenu();
-        } while (showSelectMenu(sc.next()));
+        Kiosk kiosk = new Kiosk(menuItems);
+        kiosk.start();
     }
 
-    public static void initializeItems() {
+    public static void initializeItems(List<MenuItem> menuItems) {
         MenuItem shack = new MenuItem(1, "ShackBurger", 6.9, "토마토, 양상추, 쉑소스가 토핑된 시그니처버거");
         MenuItem smoke = new MenuItem(2, "SmokeShack", 8.9, "베이컨, 체리 페퍼에 쉑소스가 토핑된 스모크버거");
         MenuItem cheese = new MenuItem(3, "Cheeseburger", 6.9, "포테이토 번과 비프패티, 치즈가 토핑된 치즈버거");
@@ -23,33 +20,5 @@ public class Main {
         menuItems.add(smoke);
         menuItems.add(cheese);
         menuItems.add(ham);
-    }
-
-    public static boolean showSelectMenu(String input) {
-        try {
-            int index = Integer.parseInt(input);
-            if (index > 0 && index < menuItems.size()) {
-                System.out.println("==============선택한 메뉴===============");
-                System.out.printf("이름 : %s\n", menuItems.get(index).getName());
-                System.out.printf("가격 : %.1f\n", menuItems.get(index).getPrice());
-                System.out.printf("설명 : %s\n", menuItems.get(index).getDescription());
-                System.out.println();
-                return true;
-            } else {
-                System.out.println("프로그램을 종료");
-                return false;
-            }
-        } catch (Exception e) {
-            System.out.println("잘못된 입력입니다.");
-            return true;
-        }
-    }
-
-    public static void showHambergMenu() {
-        System.out.println("[ SHAKESHACK MENU ]");
-        for (MenuItem menuItem : menuItems) {
-            System.out.printf("%d. %s | W %.1f | %s\n", menuItem.getIndex(), menuItem.getName(), menuItem.getPrice(), menuItem.getDescription());
-        }
-        System.out.println("0. 종료      | 종료");
     }
 }
