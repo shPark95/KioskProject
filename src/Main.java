@@ -9,11 +9,9 @@ public class Main {
         initializeItems();
 
         Scanner sc = new Scanner(System.in);
-        int input = 0;
         do {
             showHambergMenu();
-            showSelectMenu(sc.next());
-        } while (input == 0);
+        } while (showSelectMenu(sc.next()));
     }
 
     public static void initializeItems() {
@@ -27,20 +25,23 @@ public class Main {
         menuItems.add(ham);
     }
 
-    public static void showSelectMenu(String input) {
+    public static boolean showSelectMenu(String input) {
         try {
             int index = Integer.parseInt(input);
-            if (index >= 0 && index < menuItems.size()) {
+            if (index > 0 && index < menuItems.size()) {
                 System.out.println("==============선택한 메뉴===============");
                 System.out.printf("이름 : %s\n", menuItems.get(index).getName());
                 System.out.printf("가격 : %.1f\n", menuItems.get(index).getPrice());
                 System.out.printf("설명 : %s\n", menuItems.get(index).getDescription());
                 System.out.println();
+                return true;
             } else {
                 System.out.println("프로그램을 종료");
+                return false;
             }
         } catch (Exception e) {
             System.out.println("잘못된 입력입니다.");
+            return true;
         }
     }
 
