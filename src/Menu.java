@@ -4,11 +4,13 @@ import java.util.List;
 public class Menu {
     private int index;
     private String category;
+    private String description;
     private List<MenuItem> menuItems;
 
-    public Menu(int index, String category) {
+    public Menu(int index, String category, String description) {
         this.index = index;
         this.category = category;
+        this.description = description;
     }
 
     public void initializeBurgerItems() {
@@ -51,5 +53,11 @@ public class Menu {
     }
     public List<MenuItem> getMenuItems() {
         return menuItems;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
