@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 public class Kiosk {
     private List<Menu> menuList;
+    private Order order = new Order(1, "홍길동");
 
     public Kiosk(List<Menu> menuList) {
         this.menuList = menuList;
@@ -11,6 +12,7 @@ public class Kiosk {
 
     public void start() {
         Scanner sc = new Scanner(System.in);
+        int itemcnt = 0;
 
         while (true) {
             int input1 = showMainMenu(sc);
@@ -25,8 +27,21 @@ public class Kiosk {
             int input2 = showSubMenu(sc, input1);
             if (input2 == 0) continue;
 
-            boolean continueFlag = showSelectedMenu(input1 - 1, input2 - 1);
-            if (!continueFlag) break;
+            boolean orderFlag = showSelectedMenu(input1 - 1, input2 - 1);
+            if (!orderFlag) continue;
+
+            int input3 = showOrderMenu(sc);
+            if (input3 == 1) {
+                int cnt = showRequestCountOrder(sc);
+                if (cnt <= 0) continue;
+                order.addItem(itemcnt + 1, menuList.get(input1 - 1).getMenuItems().get(input2 - 1), cnt);
+                itemcnt++;
+            }
+
+            int input4 = showRequestFinal(sc);
+            if (input4 == 1) {
+                order.complete();
+            }
         }
 
     }
@@ -41,11 +56,19 @@ public class Kiosk {
 
     private int showMainMenu(Scanner sc) {
         showSHAKESHACKMainMenu();
+        System.out.println();
+        showORDERMainMenu();
         return inputnumber(sc.next());
     }
 
     private int showSubMenu(Scanner sc, int input1) {
-        menuList.get(input1 - 1).showMenu();
+        if (input1 < 4) {
+            menuList.get(input1 - 1).showMenu();
+        } else if (input1 == 4) {
+            order.showOrders();
+        } else if (input1 == menuList.size()) {
+            order.drop();
+        }
         return inputnumber(sc.next());
     }
 
@@ -61,7 +84,17 @@ public class Kiosk {
     public void showSHAKESHACKMainMenu() {
         System.out.println("[ MAIN MENU ]");
         for (Menu menu : menuList) {
-            System.out.printf("%d. %s\n", menu.getIndex(), menu.getCategory());
+            if (menu.getIndex() < 4) {
+                System.out.printf("%d. %s\n", menu.getIndex(), menu.getCategory());
+            }
+        }
+    }
+    public void showORDERMainMenu() {
+        System.out.println("[ ORDER MENU ]");
+        for (Menu menu : menuList) {
+            if (menu.getIndex() >= 4) {
+                System.out.printf("%d. %s    | %s\n", menu.getIndex(), menu.getCategory(), menu.getDescription());
+            }
         }
     }
 
@@ -75,8 +108,23 @@ public class Kiosk {
             return true;
         } else {
             System.out.println("잘못된 숫자범위입니다.");
-            return true;
+            return false;
         }
     }
 
+    public int showOrderMenu(Scanner sc) {
+        System.out.println("위 메뉴를 장바구니에 추가하시겠습니까?");
+        System.out.println("1. 확인    2. 취소");
+        return inputnumber(sc.next());
+    }
+
+    public int showRequestCountOrder(Scanner sc) {
+        System.out.println("원하시는 수량을 입력해주세요.");
+        return inputnumber(sc.next());
+    }
+
+    public int showRequestFinal(Scanner sc) {
+        System.out.println("1. 주문    2. 메뉴판");
+        return inputnumber(sc.next());
+    }
 }
