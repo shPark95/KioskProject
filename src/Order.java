@@ -1,3 +1,5 @@
+import Enums.Customer;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -5,10 +7,12 @@ public class Order {
     private int index;
     private String name;
     private List<CartItem> cartItems;
+    private Customer role;
 
-    public Order(int index, String name) {
+    public Order(int index, String name, Customer role) {
         this.index = index;
         this.name = name;
+        this.role = role;
         cartItems = new ArrayList<>();
     }
 
@@ -22,7 +26,11 @@ public class Order {
         cartItems.clear();
     }
 
-    public void complete() {
+    public void complete(int index) {
+        double discountRate = Customer.getByIndex(index).getDiscountRate();
+        double totalPrice = this.cartItems.stream().mapToDouble(CartItem::totalPrice).sum();
+        System.out.printf("주문이 완료되었습니다. 금액은 W %.1f 입니다.\n", totalPrice - totalPrice * discountRate);
+
         cartItems.clear();
     }
 
@@ -67,4 +75,8 @@ public class Order {
     public List<CartItem> getCartItems() {
         return cartItems;
     }
+    public Customer getRole() {
+        return role;
+    }
+
 }
