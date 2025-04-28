@@ -18,34 +18,39 @@ public class Kiosk {
         int itemcnt = 0;
 
         while (true) {
-            int input1 = showMainMenu(sc);
-            if (input1 == 0) {
-                break;
-            } else {
-                if (!checkValidMainMenu(input1)) {
-                    continue;
+            try {
+                int input1 = showMainMenu(sc);
+                if (input1 == 0) {
+                    break;
+                } else {
+                    if (!checkValidMainMenu(input1)) {
+                        continue;
+                    }
                 }
+
+                int input2 = showSubMenu(sc, input1);
+                if (input2 == 0) continue;
+
+                boolean orderFlag = showSelectedMenu(input1 - 1, input2 - 1);
+                if (!orderFlag) continue;
+
+                int input3 = showOrderMenu(sc);
+                if (input3 == 1) {
+                    int cnt = showRequestCountOrder(sc);
+                    if (cnt <= 0) continue;
+                    order.addItem(itemcnt + 1, menuList.get(input1 - 1).getMenuItems().get(input2 - 1), cnt);
+                    itemcnt++;
+                }
+
+                int input4 = showRequestFinal(sc);
+                if (input4 == 1) {
+                    int input5 = showDiscountInfo(sc);
+                    order.complete(input5);
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
             }
 
-            int input2 = showSubMenu(sc, input1);
-            if (input2 == 0) continue;
-
-            boolean orderFlag = showSelectedMenu(input1 - 1, input2 - 1);
-            if (!orderFlag) continue;
-
-            int input3 = showOrderMenu(sc);
-            if (input3 == 1) {
-                int cnt = showRequestCountOrder(sc);
-                if (cnt <= 0) continue;
-                order.addItem(itemcnt + 1, menuList.get(input1 - 1).getMenuItems().get(input2 - 1), cnt);
-                itemcnt++;
-            }
-
-            int input4 = showRequestFinal(sc);
-            if (input4 == 1) {
-                int input5 = showDiscountInfo(sc);
-                order.complete(input5);
-            }
         }
 
     }
@@ -69,9 +74,15 @@ public class Kiosk {
         if (input1 < 4) {
             menuList.get(input1 - 1).showMenu();
         } else if (input1 == 4) {
-            order.showOrders();
+            if (order.getCartItems().isEmpty()) {
+                throw new IllegalArgumentException("장바구니가 비어있습니다.");
+            }
+            return handleOrders(sc);
         } else if (input1 == menuList.size()) {
-            order.drop();
+            if (order.getCartItems().isEmpty()) {
+                throw new IllegalArgumentException("장바구니가 비어있습니다.");
+            }
+            return handleCancelOrders(sc);
         }
         return inputnumber(sc.next());
     }
@@ -94,10 +105,12 @@ public class Kiosk {
         }
     }
     public void showORDERMainMenu() {
-        System.out.println("[ ORDER MENU ]");
-        for (Menu menu : menuList) {
-            if (menu.getIndex() >= 4) {
-                System.out.printf("%d. %s    | %s\n", menu.getIndex(), menu.getCategory(), menu.getDescription());
+        if (!order.getCartItems().isEmpty()) {
+            System.out.println("[ ORDER MENU ]");
+            for (Menu menu : menuList) {
+                if (menu.getIndex() >= 4) {
+                    System.out.printf("%d. %s    | %s\n", menu.getIndex(), menu.getCategory(), menu.getDescription());
+                }
             }
         }
     }
@@ -137,5 +150,42 @@ public class Kiosk {
         Arrays.stream(Customer.values())
                 .forEach(x -> System.out.printf("%d. %s : %.0f%% 할인\n", x.getIndex(), x.getRole(), x.getDiscountRate() * 100));
         return inputnumber(sc.next());
+    }
+
+    public int handleOrders(Scanner sc) {
+        System.out.println("아래와 같이 주문 하시겠습니까?");
+        order.showOrders();
+
+        System.out.println("1. 주문     2. 메뉴판");
+        int input = inputnumber(sc.next());
+        if (input == 1) {
+            order.drop();
+        }
+        return 0;
+    }
+
+    public int handleCancelOrders(Scanner sc) {
+        System.out.println("취소할 항목 번호를 입력하세요.");
+        order.showOrders();
+        int input = inputnumber(sc.next());
+
+        if (input == 0) {
+            return 0;
+        } else if (input > 0 && input < order.getCartItems().size()) {
+            System.out.println("1. 전체 삭제     2. 일부 취소");
+            int input2 = inputnumber(sc.next());
+
+            if (input2 == 1) {
+                order.removeItem(input);
+            } else if (input2 == 2) {
+                System.out.println("취소할 수량을 입력하세요");
+                int count = inputnumber(sc.next());
+                order.decreaseItemCount(input, count);
+            }
+            return 0;
+        } else {
+            System.out.println("잘못된 입력입니다.");
+            return handleCancelOrders(sc);
+        }
     }
 }
