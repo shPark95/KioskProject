@@ -1,10 +1,13 @@
+import Enums.Customer;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
 public class Kiosk {
     private List<Menu> menuList;
-    private Order order = new Order(1, "홍길동");
+    private Order order = new Order(1, "홍길동", Customer.getByRole("일반인"));
 
     public Kiosk(List<Menu> menuList) {
         this.menuList = menuList;
@@ -40,7 +43,8 @@ public class Kiosk {
 
             int input4 = showRequestFinal(sc);
             if (input4 == 1) {
-                order.complete();
+                int input5 = showDiscountInfo(sc);
+                order.complete(input5);
             }
         }
 
@@ -125,6 +129,13 @@ public class Kiosk {
 
     public int showRequestFinal(Scanner sc) {
         System.out.println("1. 주문    2. 메뉴판");
+        return inputnumber(sc.next());
+    }
+
+    public int showDiscountInfo(Scanner sc) {
+        System.out.println("할인 정보를 입력해주세요.");
+        Arrays.stream(Customer.values())
+                .forEach(x -> System.out.printf("%d. %s : %.0f%% 할인\n", x.getIndex(), x.getRole(), x.getDiscountRate() * 100));
         return inputnumber(sc.next());
     }
 }
