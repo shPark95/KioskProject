@@ -2,6 +2,9 @@ import Enums.Customer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.stream.IntStream;
 
 public class Order {
     private int index;
@@ -17,9 +20,40 @@ public class Order {
     }
 
     public void addItem(int index, MenuItem item, int count) {
+        Optional<CartItem> existingItem = cartItems.stream()
+                .filter(cartItem -> cartItem.getItem().getName().equals(item.getName()))
+                .findFirst();
+
+        if (existingItem.isPresent()) {
+            CartItem tmpItem = existingItem.get();
+            tmpItem.setCount(tmpItem.getCount() + count);
+        } else {
+            CartItem tmpItem = new CartItem(index, item, count);
+            cartItems.add(tmpItem);
+        }
         System.out.printf("%s 이 장바구니에 추가되었습니다.\n", item.getName());
-        CartItem tmp = new CartItem(index, item, count);
-        cartItems.add(tmp);
+    }
+
+    public void removeItem(int index) {
+        IntStream.range(0, cartItems.size())
+                .filter(i -> i == index - 1)
+                .findFirst()
+                .ifPresent(i -> cartItems.remove(i));
+    }
+
+    public void decreaseItemCount(int index, int count) {
+        IntStream.range(0, cartItems.size())
+                .filter(i -> i == index - 1)
+                .boxed()    // 기본형을 래퍼클래스로 변환 (int -> Integer) mapToObj()는 커스텀 객체로 변환 (int -> String, int -> MenuItem)
+                .findFirst()
+                .ifPresent(i -> {
+                    CartItem tmpItem = cartItems.get(i);
+                    if (tmpItem.getCount() <= count) {
+                        cartItems.remove(i);
+                    } else {
+                        tmpItem.setCount(tmpItem.getCount() - count);
+                    }
+                });
     }
 
     public void drop() {
@@ -35,7 +69,6 @@ public class Order {
     }
 
     public void showOrders() {
-        System.out.println("아래와 같이 주문 하시겠습니까?");
         System.out.println();
         System.out.printf("[ %s's Orders ]\n", this.name);
         try {
@@ -55,8 +88,6 @@ public class Order {
                     this.cartItems.stream().mapToDouble(CartItem::totalPrice).sum());
         } catch (Exception e) {
             System.out.println("메뉴가 없습니다.");
-        } finally {
-            System.out.println("0. 종료      | 종료");
         }
     }
 
